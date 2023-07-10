@@ -1,19 +1,26 @@
 import { Model } from "sequelize";
 
-export class Homework extends Model<Homework> {
-  public id!: number;
-  public lessonId!: number;
-  public studentId!: number;
-  public fileName!: string;
+export interface Homework {
+  id: string;
+  lessonId: string;
+  studentId: string;
+  fileName: string;
+}
+
+export class HomeworkModel extends Model<HomeworkModel> implements Homework {
+  public id: string;
+  public lessonId: string;
+  public studentId: string;
+  public fileName: string;
 
   // ...
 
   static associate(models: any) {
-    Homework.belongsTo(models.Lesson, {
+    HomeworkModel.belongsTo(models.LessonModel, {
       foreignKey: 'lessonId',
       as: 'lesson',
     });
-    Homework.belongsTo(models.User, {
+    HomeworkModel.belongsTo(models.UserModel, {
       foreignKey: 'studentId',
       as: 'student',
     });

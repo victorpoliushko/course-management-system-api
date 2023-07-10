@@ -1,7 +1,7 @@
 Promotion project
 Candidate should demonstrate the usage of all hard skills from above in this project.
 
-Project idea: Course Management System API is an online management application. Its main purpose is to make efficient interaction between students and instructors in college during the period of submission of assignments and for getting appropriate feedback from instructors.
+Project idea: CourseModel Management System API is an online management application. Its main purpose is to make efficient interaction between students and instructors in college during the period of submission of assignments and for getting appropriate feedback from instructors.
 
 We expect only backend API part of the project, without front end.
 
@@ -39,7 +39,7 @@ API should be running inside docker container;
 Build CI/CD pipeline with Jenkins (preferable);
 Deploy to any cloud provider (GCP, AWS, Azure ...)
 During the final submission, you should demonstrate
-Course Management System API is accessible in the cloud;
+CourseModel Management System API is accessible in the cloud;
 Functional requirements are covered;
 Technical requirements are covered;
 The theoretical part is covered;
