@@ -9,7 +9,8 @@ import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
 import { CourseStudent, CourseStudentModel } from '../models/courseStudent';
 import { CourseFeedbackModel } from '../models/courseFeedback';
-import { GradeModel } from '../models/grade';
+import constants from '../config/constants';
+import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
 
 const addCourseSchema = Joi.object({
   name: Joi.string().required(),
@@ -22,7 +23,7 @@ export async function addCourse(req: Request, res: Response) {
   try {
     const { error } = addCourseSchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return validationErrorResponse(res, error);
     }
 
     const course = await CourseModel.create({
@@ -54,12 +55,11 @@ const assignInstuctorSchema = Joi.object({
 export async function assignCourseInstuctor(req: Request, res: Response) {
   const instructorId = req.params.instructorId;
   const courseId = req.params.courseId;
-  const { roleName } = req.body;
 
   try {
     const { error } = assignInstuctorSchema.validate(req.params);
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return validationErrorResponse(res, error);
     }
 
     const user = await UserModel.findByPk(instructorId);
@@ -112,7 +112,7 @@ export async function assignCourseStudent(req: Request, res: Response) {
   try {
     const { error } = takeCourseSchema.validate(req.params);
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return validationErrorResponse(res, error);
     }
 
     const token = req.cookies.token;
@@ -120,18 +120,12 @@ export async function assignCourseStudent(req: Request, res: Response) {
       return res.status(401).json({ error: 'Authentication token not found' });
     }
 
-    // Verify and decode the token
     const decodedToken = jwt.verify(token, 'your-secret-key') as { id: string };
     const loggedInUserId = decodedToken.id;
 
     const user = await UserModel.findByPk(loggedInUserId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
-    }
-
-    const studentRole = await RoleModel.findOne({ where: { id: user.roleId, name: RoleName.STUDENT } });
-    if (!studentRole) {
-      return res.status(403).json({ error: 'Student role not found' });
     }
 
     const studentCourse = await CourseStudentModel.count({
@@ -146,7 +140,7 @@ export async function assignCourseStudent(req: Request, res: Response) {
       where: { studentId: user.id },
     });
 
-    if (studentCoursesCount >= 5) {
+    if (studentCoursesCount >= constants.courseLimit) {
       return res.status(400).json({ error: 'Maximum course limit reached' });
     }
 
@@ -194,7 +188,7 @@ export async function addCourseFeedback(req: Request, res: Response) {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ errors });
+      return validationMultipleErrorResponse(res, errors);
     }
 
     const user = await UserModel.findByPk(studentId);
@@ -314,7 +308,7 @@ export async function getCourseStudents(req: Request, res: Response) {
 
     const { error } = getCourseStudentsSchema.validate(req.params);
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return validationErrorResponse(res, error);
     }
 
     const courseStudents = await CourseStudentModel.findAll({
@@ -360,11 +354,9 @@ export async function getLessons(req: Request, res: Response) {
       ],
     });
 
-
     return res.status(200).json({ course });
   } catch (error) {
     console.error('Error retrieving instructor courses:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
-

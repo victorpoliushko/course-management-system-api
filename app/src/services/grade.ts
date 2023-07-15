@@ -1,14 +1,12 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../models/user';
 import { RoleModel, RoleName } from '../models/role';
-import jwt from 'jsonwebtoken';
 import Joi from 'joi';
-import { CourseModel } from '../models/course';
-import { CourseInstructorModel } from '../models/courseInstructor';
 import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
 import { CourseStudentModel } from '../models/courseStudent';
 import { GradeModel } from '../models/grade';
+import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
 
 const addMarkSchema = Joi.object({
   studentId: Joi.string().uuid().required(),
@@ -38,7 +36,7 @@ export async function addMark(req: Request, res: Response) {
     }
 
     if (errors.length > 0) {
-      return res.status(400).json({ errors });
+      return validationMultipleErrorResponse(res, errors);
     }
 
     const user = await UserModel.findByPk(studentId);
@@ -80,7 +78,7 @@ export async function getAvgCourseGrade(req: Request, res: Response) {
     const { error } = getAvgCourseGradeSchema.validate(req.params);
 
     if (error) {
-      return res.status(400).json({ error: error.details[0].message });
+      return validationErrorResponse(res, error);
     }
     
     const user = await UserModel.findByPk(studentId);

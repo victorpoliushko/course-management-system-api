@@ -2,13 +2,14 @@ import express, { Express, Request, Response } from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import SequelizeStore from 'connect-session-sequelize';
-import sequelize from "./config/database";
-import { UserModel } from './models/user';
-import { RoleModel } from './models/role';
-import router from './routes/router';
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
+
+import sequelize from './config/database';
+import { UserModel } from './models/user';
+import { RoleModel } from './models/role';
+import router from './routes/router';
 import { LessonModel } from './models/lesson';
 import { CourseModel } from './models/course';
 import { CourseInstructorModel } from './models/courseInstructor';
@@ -58,18 +59,15 @@ async function init(): Promise<void> {
     RoleModel.initialize(sequelize);
     LessonModel.initialize(sequelize);
     CourseModel.initialize(sequelize);
-    CourseInstructorModel.initialize(sequelize);
-    CourseInstructorModel.associate({ CourseModel, UserModel });
-    CourseStudentModel.initialize(sequelize);
-    CourseStudentModel.associate({ CourseModel, UserModel });
-    CourseFeedbackModel.initialize(sequelize);
-    CourseFeedbackModel.associate({ CourseModel, UserModel });
-
-    CourseModel.associate({ LessonModel, UserModel });
-    // LessonModel.associate({ CourseModel, GradeModel });
-    // UserModel.associate({ CourseModel, GradeModel });
-
     GradeModel.initialize(sequelize);
+    CourseInstructorModel.initialize(sequelize);
+    CourseStudentModel.initialize(sequelize);
+    CourseFeedbackModel.initialize(sequelize);
+
+    CourseInstructorModel.associate({ CourseModel, UserModel });
+    CourseStudentModel.associate({ CourseModel, UserModel });
+    CourseFeedbackModel.associate({ CourseModel, UserModel });
+    CourseModel.associate({ LessonModel, UserModel });
 
     await sequelize.sync({ alter: true }); 
 
