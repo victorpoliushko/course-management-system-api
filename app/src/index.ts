@@ -9,7 +9,6 @@ import cookieParser from 'cookie-parser';
 import sequelize from './config/database';
 import { UserModel } from './models/user';
 import { RoleModel } from './models/role';
-import router from './routes/router';
 import { LessonModel } from './models/lesson';
 import { CourseModel } from './models/course';
 import { CourseInstructorModel } from './models/courseInstructor';
@@ -19,18 +18,11 @@ import { CourseFeedbackModel } from './models/courseFeedback';
 
 const app: Express = express();
 const port = 3000; 
+const SequelizeStoreInstance = SequelizeStore(session.Store);
 
 app.use(bodyParser.json());
 app.use(cors());
-
 app.use(cookieParser());
-app.use(session({ secret: 'your-secret-key' }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.use('/', router);
-
-const SequelizeStoreInstance = SequelizeStore(session.Store);
 app.use(
   session({
     secret: 'your-secret-key', 
@@ -39,6 +31,8 @@ app.use(
     store: new SequelizeStoreInstance({ db: sequelize }), 
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, Express server!');

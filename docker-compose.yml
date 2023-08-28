@@ -1,0 +1,48 @@
+version: '3'
+services:
+  db:
+    networks:
+      - mynetwork
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5450:5450
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - PGPORT=${DB_PORT}
+    volumes:
+      - promotion-postgres-volume:/var/lib/postgresql/data
+
+  promotion-api:
+    networks:
+      - mynetwork
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: promotion-api-v2
+    container_name: promotion-api
+    # restart: on-failure
+    # env_file: .env
+    environment:
+      - DB_VOLUME=promotion-postgres-volume
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+    ports:
+      - 3000
+    links:
+      - db
+    depends_on:
+      - db
+    working_dir: /app
+    command: npm run start
+
+volumes:
+  promotion-postgres-volume:
+
+networks:
+  mynetwork:
+    driver: bridge

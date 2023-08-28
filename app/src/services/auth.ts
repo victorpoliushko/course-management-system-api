@@ -7,11 +7,6 @@ import Joi from 'joi';
 import constants from '../config/constants';
 import { validationErrorResponse } from '../utils/error';
 
-const loginSchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().min(6).required(),
-});
-
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
@@ -37,6 +32,11 @@ passport.deserializeUser(async (id: any, done) => {
   } catch (error) {
     done(error);
   }
+});
+
+const loginSchema = Joi.object({
+  username: Joi.string().required(),
+  password: Joi.string().min(6).required(),
 });
 
 export async function login(req: Request, res: Response) {
