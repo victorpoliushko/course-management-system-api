@@ -7,6 +7,11 @@ pipeline {
     CLIENT_EMAIL='jenkins-gcloud@vertical-realm-397409.iam.gserviceaccount.com'
   }
   stages {
+    stage('Connect to git') {
+      steps {
+        sh 'git fetch --tags --force --progress --prune -- origin +refs/heads/main:refs/remotes/origin/main'
+      }
+    }
     stage('Verify version') {
       steps {
         sh '''
