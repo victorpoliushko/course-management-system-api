@@ -15,9 +15,14 @@ import { CourseInstructorModel } from './models/courseInstructor';
 import { GradeModel } from './models/grade';
 import { CourseStudentModel } from './models/courseStudent';
 import { CourseFeedbackModel } from './models/courseFeedback';
+import courseRouter from './routes/courses';
+import authRouter from './routes/auth';
+import feedbackRouter from './routes/feedback';
+import gradesRouter from './routes/grades';
+import usersRouter from './routes/users';
 
 const app: Express = express();
-const port = 3000; 
+const port = 8080; 
 const SequelizeStoreInstance = SequelizeStore(session.Store);
 
 app.use(bodyParser.json());
@@ -37,6 +42,12 @@ app.use(passport.session());
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello, Express server!');
 });
+
+app.use('/auth', authRouter);
+app.use('/courses', courseRouter);
+app.use('/feedbacks', feedbackRouter);
+app.use('/grades', gradesRouter);
+app.use('/users', usersRouter);
 
 async function connectToDatabase() {
   try {
@@ -62,6 +73,8 @@ async function init(): Promise<void> {
     CourseStudentModel.associate({ CourseModel, UserModel });
     CourseFeedbackModel.associate({ CourseModel, UserModel });
     CourseModel.associate({ LessonModel, UserModel });
+
+    //add seed
 
     await sequelize.sync({ alter: true }); 
 

@@ -3,8 +3,8 @@ import express from 'express';
 import { assignRole } from '../services/user';
 import { isAdmin } from '../middlewares/role';
 
-const router = express.Router();
+const usersRouter = express.Router();
 
-router.post('/users/:userId/role', isAdmin, assignRole);
+usersRouter.post('/:userId/role', isAdmin, assignRole);
 
-export default router;
+export default usersRouter;

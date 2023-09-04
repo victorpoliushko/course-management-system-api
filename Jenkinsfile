@@ -21,24 +21,20 @@ pipeline {
         '''
       }
     }
-    stage('Install service') {
+    stage('Build') {
       steps {
-        sh '''
-          ${GCLOUD_PATH} run services replace service.yaml --platform='managed' --region='us-central1'
-        '''
+        echo 'building the app'
       }
     }
-    stage('Allow allUsers') {
+    stage('Test') {
       steps {
-        sh '''
-          ${GCLOUD_PATH} run services add-iam-policy-binding hello --region='us-central1' --member='allUsers' --role='roles/run.invoker'
-        '''
+        echo 'testing the app'
       }
     }
-  }
-  post {
-    always {
-      sh '${GCLOUD_PATH} auth revoke $CLIENT_EMAIL'
+    stage('Deploy') {
+      steps {
+        echo 'deploying the app'
+      }
     }
   }
 }

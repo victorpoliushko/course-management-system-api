@@ -31,7 +31,9 @@ RUN npm install
 # copy remaining assets
 COPY app .
 
-EXPOSE 3000
+# EXPOSE 3000
+
+ENV NODE_ENV=production
 
 # Runs the dev npm script to build & start the server
 CMD npm run start
