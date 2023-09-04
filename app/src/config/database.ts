@@ -27,16 +27,4 @@ else {
 
 const sequelize = new Sequelize(config);
 
-// const sequelize = new Sequelize({
-//   database: 'aa',
-//   username: 'aa',
-//   password: 'aa',
-//   host: 'aa',
-//   port: 2345,
-//   dialect: 'postgres',
-//   dialectOptions: {
-//     ssl: false, 
-//   },
-// });
-
 export default sequelize;
