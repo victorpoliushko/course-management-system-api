@@ -48,4 +48,4 @@ Pipeline is working;
 The architecture and design patterns are reasonable;
 README file with all necessary instruction is done and accessible in the root of the project;
 
-testing jenkins 4
+testing jenkins 5
