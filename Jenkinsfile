@@ -34,6 +34,9 @@ pipeline {
     stage('Deploy') {
       steps {
         echo 'deploying the app'
+        sh '''
+          ${GCLOUD_PATH} run deploy
+        '''
       }
     }
   }
