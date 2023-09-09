@@ -30,7 +30,7 @@ pipeline {
       steps {
         script {
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
-          sh '''echo ${IMAGE_NAME}'''
+          sh '''echo "${IMAGE_NAME}"'''
         }
       }
     }
