@@ -26,14 +26,14 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo 'building the app        
+        echo '''building the app        
         ${PROJECT_ID}
         ${SERVICE_NAME}
-        ${TIMESTAMP}'
+        ${TIMESTAMP}'''
 
-        echo "${PROJECT_ID}
-        ${SERVICE_NAME}
-        ${TIMESTAMP}"
+        // echo "${PROJECT_ID}
+        // ${SERVICE_NAME}
+        // ${TIMESTAMP}"
 
         // docker build -t promotion-api:v1.0 .
       }
