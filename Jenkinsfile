@@ -3,9 +3,11 @@ pipeline {
   environment {
     // GCLOUD_PATH='/Users/viktor-poliushko/google-cloud-sdk/bin/gcloud'
     GCLOUD_PATH=credentials('gcloud-path')
-    PROJECT_ID=credentials('project-id')
     GCLOUD_CREDS=credentials('gcloud-creds')
-    SERVICE_NAME=credentials('service-name')
+    // PROJECT_ID=credentials('project-id')
+    // SERVICE_NAME=credentials('service-name')
+    PROJECT_ID='vertical-realm-397409'
+    SERVICE_NAME='cloud-build-promotion'
     TIMESTAMP = new Date().format("yyyyMMddHHmmss")
     // CLIENT_EMAIL='jenkins-gcloud@vertical-realm-397409.iam.gserviceaccount.com'
   }
