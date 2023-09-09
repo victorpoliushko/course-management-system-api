@@ -8,6 +8,7 @@ pipeline {
     // SERVICE_NAME=credentials('service-name')
     PROJECT_ID='vertical-realm-397409'
     SERVICE_NAME='cloud-build-promotion'
+    REGION='us-central1'
     TIMESTAMP = new Date().format("yyyyMMddHHmmss")
     // CLIENT_EMAIL='jenkins-gcloud@vertical-realm-397409.iam.gserviceaccount.com'
   }
@@ -49,7 +50,7 @@ pipeline {
           sh """
             ${GCLOUD_PATH} config set project ${PROJECT_ID}
             ${GCLOUD_PATH} builds submit --tag=${IMAGE_NAME}
-            ${GCLOUD_PATH} run deploy ${SERVICE_NAME} --image=${IMAGE_NAME} --platform=managed --allow-unauthenticated
+            ${GCLOUD_PATH} run deploy ${SERVICE_NAME} --image=${IMAGE_NAME} --region=${REGION} --platform=managed --allow-unauthenticated
           """
         }
       }
