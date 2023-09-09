@@ -50,7 +50,7 @@ pipeline {
         script {
           echo 'deploying the app'
 
-          def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
+          def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}/${TIMESTAMP}"
           def CONTAINER_NAME = "${SERVICE_NAME}-${TIMESTAMP}"
 
           sh '''
