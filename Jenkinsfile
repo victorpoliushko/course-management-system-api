@@ -1,7 +1,8 @@
 pipeline {
   agent any
   environment {
-    GCLOUD_PATH='/Users/viktor-poliushko/google-cloud-sdk/bin/gcloud'
+    // GCLOUD_PATH='/Users/viktor-poliushko/google-cloud-sdk/bin/gcloud'
+    GCLOUD_PATH=credentials('gcloud-path')
     CLOUDSDK_CORE_PROJECT='vertical-realm-397409'
     GCLOUD_CREDS=credentials('gcloud-creds')
     CLIENT_EMAIL='jenkins-gcloud@vertical-realm-397409.iam.gserviceaccount.com'
@@ -24,6 +25,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'building the app'
+        docker build -t promotion-api:v1.0 .
       }
     }
     stage('Test') {
