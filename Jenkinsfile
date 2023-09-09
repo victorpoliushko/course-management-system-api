@@ -40,6 +40,24 @@ pipeline {
         script {
           echo 'deploying the app'
 
+          echo ${PROJECT_ID}
+          echo ${SERVICE_NAME}
+          echo ${TIMESTAMP}
+          echo ${IMAGE_NAME}
+          echo ${CONTAINER_NAME}
+
+          echo '${PROJECT_ID}'
+          echo '${SERVICE_NAME}'
+          echo '${TIMESTAMP}'
+          echo '${IMAGE_NAME}'
+          echo '${CONTAINER_NAME}'
+
+          echo "${PROJECT_ID}"
+          echo "${SERVICE_NAME}"
+          echo "${TIMESTAMP}"
+          echo "${IMAGE_NAME}"
+          echo "${CONTAINER_NAME}"
+
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
           def CONTAINER_NAME = "${SERVICE_NAME}-${TIMESTAMP}"
 
