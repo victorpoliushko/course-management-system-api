@@ -26,10 +26,10 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo '''building the app        
-        ${PROJECT_ID}
-        ${SERVICE_NAME}
-        ${TIMESTAMP}'''
+        sh ''' echo building the app        
+        echo ${PROJECT_ID}
+        echo ${SERVICE_NAME}
+        echo ${TIMESTAMP}'''
 
         // echo "${PROJECT_ID}
         // ${SERVICE_NAME}
