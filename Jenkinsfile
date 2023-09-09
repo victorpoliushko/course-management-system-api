@@ -29,9 +29,8 @@ pipeline {
     stage('Build') {
       steps {
         script {
-          echo 'building the app'
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
-          echo ${IMAGE_NAME}
+          sh '''echo ${IMAGE_NAME}'''
         }
       }
     }
