@@ -28,16 +28,7 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh ''' echo building the app        
-        echo ${PROJECT_ID}
-        echo ${SERVICE_NAME}
-        echo ${TIMESTAMP}'''
-
-        // echo "${PROJECT_ID}
-        // ${SERVICE_NAME}
-        // ${TIMESTAMP}"
-
-        // docker build -t promotion-api:v1.0 .
+        echo 'building the app'
       }
     }
     stage('Test') {
@@ -50,10 +41,10 @@ pipeline {
         script {
           echo 'deploying the app'
 
-          def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}/${TIMESTAMP}"
-          def CONTAINER_NAME = "${SERVICE_NAME}-${TIMESTAMP}"
+          def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
 
           sh '''
+          echo ${IMAGE_NAME}
             ${GCLOUD_PATH} config set project ${PROJECT_ID}
             ${GCLOUD_PATH} builds submit --tag=${IMAGE_NAME}
             ${GCLOUD_PATH} run deploy ${SERVICE_NAME} --image=${IMAGE_NAME} --platform=managed --allow-unauthenticated
