@@ -28,8 +28,8 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo 'building the app'
         script {
+          echo 'building the app'
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
           echo ${IMAGE_NAME}
         }
@@ -48,7 +48,6 @@ pipeline {
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
 
           sh '''
-          echo ${IMAGE_NAME}
             ${GCLOUD_PATH} config set project ${PROJECT_ID}
             ${GCLOUD_PATH} builds submit --tag=${IMAGE_NAME}
             ${GCLOUD_PATH} run deploy ${SERVICE_NAME} --image=${IMAGE_NAME} --platform=managed --allow-unauthenticated
