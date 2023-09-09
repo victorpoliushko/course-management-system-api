@@ -35,7 +35,7 @@ pipeline {
       steps {
         echo 'deploying the app'
         sh '''
-          ${GCLOUD_PATH} run deploy
+          ${GCLOUD_PATH} run services update cloud-build-promotion
         '''
       }
     }
