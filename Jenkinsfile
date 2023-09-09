@@ -26,7 +26,15 @@ pipeline {
     }
     stage('Build') {
       steps {
-        echo 'building the app'
+        echo 'building the app        
+        ${PROJECT_ID}
+        ${SERVICE_NAME}
+        ${TIMESTAMP}'
+
+        echo "${PROJECT_ID}
+        ${SERVICE_NAME}
+        ${TIMESTAMP}"
+
         // docker build -t promotion-api:v1.0 .
       }
     }
@@ -39,24 +47,6 @@ pipeline {
       steps {
         script {
           echo 'deploying the app'
-
-          echo ${PROJECT_ID}
-          echo ${SERVICE_NAME}
-          echo ${TIMESTAMP}
-          echo ${IMAGE_NAME}
-          echo ${CONTAINER_NAME}
-
-          echo '${PROJECT_ID}'
-          echo '${SERVICE_NAME}'
-          echo '${TIMESTAMP}'
-          echo '${IMAGE_NAME}'
-          echo '${CONTAINER_NAME}'
-
-          echo "${PROJECT_ID}"
-          echo "${SERVICE_NAME}"
-          echo "${TIMESTAMP}"
-          echo "${IMAGE_NAME}"
-          echo "${CONTAINER_NAME}"
 
           def IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:${TIMESTAMP}"
           def CONTAINER_NAME = "${SERVICE_NAME}-${TIMESTAMP}"
