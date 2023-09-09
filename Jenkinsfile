@@ -25,7 +25,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'building the app'
-        docker build -t promotion-api:v1.0 .
+        // docker build -t promotion-api:v1.0 .
       }
     }
     stage('Test') {
