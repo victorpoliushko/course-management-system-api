@@ -1,13 +1,15 @@
-import { Sequelize } from "sequelize";
-import constants from "./constants";
+import { Dialect, Sequelize } from "sequelize";
+require('dotenv').config();
+
+const port: number = parseInt(process.env.DB_PORT || '5432', 10);
 
 const config = {
-  database: constants.db.name,
-  username: constants.db.user,
-  password: constants.db.password,
-  host: constants.db.host,
-  port: constants.db.port,
-  dialect: constants.db.dialect,
+  database: process.env.DB_NAME || 'postgres',
+  username: process.env.DB_USER || 'postgres',
+  password: process.env.DB_PASSWORD || 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port,
+  dialect: process.env.DB_DIALECT as Dialect || 'postgres' as Dialect,
   dialectOptions: {
     ssl: false, 
   },
@@ -15,7 +17,7 @@ const config = {
 
 if (process.env.NODE_ENV === 'production') {
   console.log('Running from cloud. Connecting to DB through GCP socket.');
-  config.host = `/cloudsql/${constants.db.instanceConnectionName}`;
+  config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
 }
 
 else {

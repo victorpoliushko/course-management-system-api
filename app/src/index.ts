@@ -20,6 +20,7 @@ import authRouter from './routes/auth';
 import feedbackRouter from './routes/feedback';
 import gradesRouter from './routes/grades';
 import usersRouter from './routes/users';
+// import seedRoles from '../seeders/seedRoles';
 
 const app: Express = express();
 const port = 8080; 
@@ -74,9 +75,9 @@ async function init(): Promise<void> {
     CourseFeedbackModel.associate({ CourseModel, UserModel });
     CourseModel.associate({ LessonModel, UserModel });
 
-    //add seed
-
     await sequelize.sync({ alter: true }); 
+
+    // await seedRoles(sequelize);
 
     const tableNames = Object.values(sequelize.models).map((model) => model.tableName);
     console.log('Tables created:', tableNames.join(', '));
