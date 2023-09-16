@@ -20,7 +20,7 @@ import authRouter from './routes/auth';
 import feedbackRouter from './routes/feedback';
 import gradesRouter from './routes/grades';
 import usersRouter from './routes/users';
-// import seedRoles from '../seeders/seedRoles';
+import constants from './config/constants';
 
 const app: Express = express();
 const port = 8080; 
@@ -31,7 +31,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(
   session({
-    secret: 'your-secret-key', 
+    secret: constants.sessionSecret, 
     resave: false,
     saveUninitialized: false,
     store: new SequelizeStoreInstance({ db: sequelize }), 
@@ -76,8 +76,6 @@ async function init(): Promise<void> {
     CourseModel.associate({ LessonModel, UserModel });
 
     await sequelize.sync({ alter: true }); 
-
-    // await seedRoles(sequelize);
 
     const tableNames = Object.values(sequelize.models).map((model) => model.tableName);
     console.log('Tables created:', tableNames.join(', '));

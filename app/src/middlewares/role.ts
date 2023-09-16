@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { RoleModel, RoleName } from '../models/role';
 import { UserModel } from '../models/user';
+import constants from '../config/constants';
 
 async function verifyRole(roleName: RoleName, req: Request, res: Response, next: NextFunction): Promise<Response | void> {
   try {
@@ -10,7 +11,7 @@ async function verifyRole(roleName: RoleName, req: Request, res: Response, next:
       return res.status(401).json({ error: 'Authentication token not found' });
     }
 
-    const decodedToken = jwt.verify(token, 'your-secret-key') as { id: string };
+    const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
     const loggedInUserId = decodedToken.id;
 
     const user = await UserModel.findByPk(loggedInUserId);

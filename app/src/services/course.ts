@@ -134,7 +134,7 @@ export async function assignCourseStudent(req: Request, res: Response) {
       return res.status(401).json({ error: 'Authentication token not found' });
     }
 
-    const decodedToken = jwt.verify(token, 'your-secret-key') as { id: string };
+    const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
     const loggedInUserId = decodedToken.id;
 
     const user = await UserModel.findByPk(loggedInUserId);
@@ -223,7 +223,7 @@ export async function addCourseFeedback(req: Request, res: Response) {
       return res.status(401).json({ error: 'Authentication token not found' });
     }
 
-    const decodedToken = jwt.verify(token, 'your-secret-key') as { id: string };
+    const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
     const instructorId = decodedToken.id;
 
     const courseFeedback = await CourseFeedbackModel.create({
@@ -249,7 +249,7 @@ export async function getOwnCourses(req: Request, res: Response) {
       return res.status(401).json({ error: 'Authentication token not found' });
     }
 
-    const decodedToken = jwt.verify(token, 'your-secret-key') as { id: string };
+    const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
     const userId = decodedToken.id;
 
     const user = await UserModel.findByPk(userId);

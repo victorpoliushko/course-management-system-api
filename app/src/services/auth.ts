@@ -6,6 +6,7 @@ import { User, UserModel } from '../models/user';
 import Joi from 'joi';
 import constants from '../config/constants';
 import { validationErrorResponse } from '../utils/error';
+import { RoleModel, RoleName } from '../models/role';
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {
@@ -48,7 +49,7 @@ export async function login(req: Request, res: Response) {
   if (req.user) {
     const user = req.user as User;
 
-    const token = jwt.sign({ id: user.id }, 'your-secret-key');
+    const token = jwt.sign({ id: user.id }, constants.sessionSecret);
 
     res.cookie('token', token, { httpOnly: true });
 
@@ -90,12 +91,17 @@ export async function register(req: Request, res: Response): Promise<Response> {
       return res.status(409).json({ error: 'Username is already taken' });
     }
 
+    const studentRole = await RoleModel.findOne({ where: { name: RoleName.STUDENT } });
+    if (!studentRole) {
+      return res.status(404).json({ error: 'Student role doesn\'t exist. Please run the migration first' });
+    }
+
     const hashedPassword = await UserModel.hashPassword(password);
 
     const newUser = await UserModel.create({
       username,
       password: hashedPassword,
-      roleId: constants.studentId
+      roleId: studentRole.id
     });
 
     return res.status(201).json({ message: 'User registered successfully' });
