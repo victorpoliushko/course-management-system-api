@@ -21,6 +21,7 @@ import feedbackRouter from './routes/feedback';
 import gradesRouter from './routes/grades';
 import usersRouter from './routes/users';
 import constants from './config/constants';
+import lessonRouter from './routes/lesson';
 
 const app: Express = express();
 const port = 8080; 
@@ -49,6 +50,7 @@ app.use('/courses', courseRouter);
 app.use('/feedbacks', feedbackRouter);
 app.use('/grades', gradesRouter);
 app.use('/users', usersRouter);
+app.use('/lessons', lessonRouter);
 
 async function connectToDatabase() {
   try {
@@ -74,6 +76,7 @@ async function init(): Promise<void> {
     CourseStudentModel.associate({ CourseModel, UserModel });
     CourseFeedbackModel.associate({ CourseModel, UserModel });
     CourseModel.associate({ LessonModel, UserModel });
+    GradeModel.associate({ LessonModel, UserModel });
 
     await sequelize.sync({ alter: true }); 
 

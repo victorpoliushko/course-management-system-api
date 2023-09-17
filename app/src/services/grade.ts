@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CourseStudentModel } from '../models/courseStudent';
 import { GradeModel } from '../models/grade';
 import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
+import constants from '../config/constants';
 
 const addMarkSchema = Joi.object({
   studentId: Joi.string().uuid().required(),
@@ -14,7 +15,7 @@ const addMarkSchema = Joi.object({
 });
 
 const addMarkSchemaParams = Joi.object({
-  mark: Joi.number().required()
+  mark: Joi.number().required().max(100)
 });
 
 export async function addMark(req: Request, res: Response) {
@@ -59,23 +60,23 @@ export async function addMark(req: Request, res: Response) {
       mark
     });
 
-    return res.status(200).json({ message: 'Grade created successfully' });
+    return res.status(200).json({ message: 'Grade assigned successfully' });
   } catch (error) {
-    console.error('Error creating course:', error);
+    console.error('Error assigning grade:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
 
-const getAvgCourseGradeSchema = Joi.object({
+const getFinalCourseGradeSchema = Joi.object({
   studentId: Joi.string().uuid().required(),
   courseId: Joi.string().uuid().required()
 });
 
-export async function getAvgCourseGrade(req: Request, res: Response) {
+export async function getFinalCourseGrade(req: Request, res: Response) {
   const { studentId, courseId } = req.params;
 
   try {
-    const { error } = getAvgCourseGradeSchema.validate(req.params);
+    const { error } = getFinalCourseGradeSchema.validate(req.params);
 
     if (error) {
       return validationErrorResponse(res, error);
@@ -94,7 +95,7 @@ export async function getAvgCourseGrade(req: Request, res: Response) {
       return res.status(404).json({ error: 'User is not a student' });
     }
 
-    const studentCourse = await CourseStudentModel.count({
+    const studentCourse = await CourseStudentModel.findOne({
       where: { courseId, studentId },
     });
 
@@ -112,14 +113,22 @@ export async function getAvgCourseGrade(req: Request, res: Response) {
 
     for (const lesson of lessons) {
       const grades = await GradeModel.findAll({ where: { lessonId: lesson.id, studentId } });
-      const avgStudentLessonMark = grades.reduce((sum, grade) => sum + grade.mark, 0) / grades.length;
+      if (grades.length <= 0) {
+        return res.status(404).json({ error: 'Can not calculate average grade. Please add grades to each lesson' });
+      }
 
+      const avgStudentLessonMark = grades.reduce((sum, grade) => sum + grade.mark, 0) / grades.length;
       totalAvgStudentLessonMarks.push(avgStudentLessonMark);
     }
 
-    const avgCourseGrade = totalAvgStudentLessonMarks.reduce((sum, mark) => sum + mark, 0) / totalAvgStudentLessonMarks.length;
+    const avgCourseGrade = Math.round(totalAvgStudentLessonMarks.reduce((sum, mark) => sum + mark, 0) / totalAvgStudentLessonMarks.length);
 
-    return res.status(200).json({ message: 'Average course grade', avgCourseGrade });
+    if (avgCourseGrade >= constants.minRequiredGrade) {
+      await studentCourse.update({ passed: true });
+      return res.status(200).json({ message: 'Course passed', avgCourseGrade });
+    } 
+    await studentCourse.update({ passed: false });
+    return res.status(200).json({ message: 'Course NOT passed', avgCourseGrade });
   } catch (error) {
     console.error('Error calculating average course grade:', error);
     return res.status(500).json({ error: 'Internal server error' });

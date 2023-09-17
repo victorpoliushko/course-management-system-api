@@ -116,15 +116,15 @@ export async function assignCourseInstuctor(req: Request, res: Response) {
   }
 }
 
-const takeCourseSchema = Joi.object({
-  courseId: Joi.string().uuid().required()
+const assignCoursesStudentSchema = Joi.object({
+  courseIds: Joi.array().items(Joi.string().uuid()).max(5).required()
 });
 
-export async function assignCourseStudent(req: Request, res: Response) {
-  const courseId = req.params.courseId;
+export async function assignCoursesStudent(req: Request, res: Response) {
+  const courseIds = req.body.courseIds;
 
   try {
-    const { error } = takeCourseSchema.validate(req.params);
+    const { error } = assignCoursesStudentSchema.validate(req.body);
     if (error) {
       return validationErrorResponse(res, error);
     }
@@ -142,34 +142,37 @@ export async function assignCourseStudent(req: Request, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const studentCourse = await CourseStudentModel.count({
-      where: { courseId, studentId: user.id },
-    });
+    for (const id of courseIds) {
+      const existingCourseStudent = await CourseStudentModel.findOne({
+        where: { courseId: id, studentId: user.id },
+      });
 
-    if (studentCourse >= 1) {
-      return res.status(400).json({ error: 'Course already assigned' });
-    }
+      if (existingCourseStudent) {
+        continue;
+      }
 
-    const studentCoursesCount = await CourseStudentModel.count({
-      where: { studentId: user.id },
-    });
+      const studentCoursesCount = await CourseStudentModel.count({
+        where: { studentId: user.id },
+      });
 
-    if (studentCoursesCount >= constants.courseLimit) {
-      return res.status(400).json({ error: 'Maximum course limit reached' });
-    }
+      if (studentCoursesCount >= constants.courseLimit) {
+        return res.status(400).json({ error: 'Maximum course limit reached' });
+      }
 
-    const courseStudent = await CourseStudentModel.create({
-      id: uuidv4(),
-      courseId: courseId,
-      studentId: user.id,
-    });
-
-    if (!courseStudent) {
-      return res.status(404).json({ error: 'Course not assigned' });
+      const courseStudent = await CourseStudentModel.create({
+        id: uuidv4(),
+        courseId: id,
+        studentId: user.id,
+      });
+  
+      if (!courseStudent) {
+        return res.status(404).json({ error: 'Course not assigned' });
+      }
     }
 
     return res.status(200).json({ message: 'Course assigned successfully' });
   } catch (error) {
+    console.error('Error assigning courses:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -271,10 +274,22 @@ export async function getOwnCourses(req: Request, res: Response) {
       case RoleName.INSTRUCTOR:
         userCourses = await CourseInstructorModel.findAll({
           where: { instructorId: userId },
-          include: {
-            model: CourseModel,
-            as: 'course',
-          },
+          include: [
+            {
+              model: CourseModel,
+              as: 'course',
+              include: [
+                {
+                  model: UserModel,
+                  as: 'instructor',
+                },
+                {
+                  model: UserModel,
+                  as: 'student',
+                },
+              ],
+            },
+          ],
         });
       break;
 
@@ -371,6 +386,71 @@ export async function getLessons(req: Request, res: Response) {
     return res.status(200).json({ course });
   } catch (error) {
     console.error('Error retrieving instructor courses:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+const assignLessonsParamsSchema = Joi.object({
+  courseId: Joi.string().uuid().required()
+});
+
+const assignLessonsBodySchema = Joi.object({
+  lessonIds: Joi.array().items(Joi.string().uuid()).required()
+});
+
+export async function assignLessons(req: Request, res: Response) {
+  const { error: paramsError } = assignLessonsParamsSchema.validate(req.params);
+  const { error: bodyError } = assignLessonsBodySchema.validate(req.body);
+
+  const errors: string[] = [];
+
+  if (paramsError) {
+    errors.push(paramsError.details[0].message);
+  }
+
+  if (bodyError) {
+    errors.push(bodyError.details[0].message);
+  }
+
+  if (errors.length > 0) {
+    return validationMultipleErrorResponse(res, errors);
+  }
+
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication token not found' });
+  }
+
+  const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
+  const userId = decodedToken.id;
+
+  try {
+    const courseId = req.params.courseId;
+    const lessonIds = req.body.lessonIds;
+
+    const user = await UserModel.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const course = await CourseModel.findByPk(courseId);
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    for (const id of lessonIds) {
+      let lesson = await LessonModel.findByPk(id);
+      if (!lesson) {
+        return res.status(404).json({ error: `Lesson ${id} not found` });
+      }
+
+      lesson.courseId = course.id
+      await lesson.save();
+    }
+    
+    return res.status(200).json({ message: 'Lessons assigned successfully' });
+  } catch (error) {
+    console.error('Error assigning lessons:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

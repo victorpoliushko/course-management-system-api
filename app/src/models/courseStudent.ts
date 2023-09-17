@@ -7,6 +7,7 @@ export interface CourseStudent {
   id: string;
   courseId: string;
   studentId: string;
+  passed?: boolean;
 
   course?: NonAttribute<CourseStudent[]>;
 }
@@ -15,6 +16,7 @@ export class CourseStudentModel extends Model<CourseStudent> implements CourseSt
   public id: string;
   public courseId: string;
   public studentId: string;
+  public passed?: boolean;
 
   public course?: NonAttribute<CourseStudent[]>;
   public student?: NonAttribute<CourseStudent[]>;
@@ -39,6 +41,10 @@ export class CourseStudentModel extends Model<CourseStudent> implements CourseSt
         studentId: {
           type: DataTypes.STRING,
           allowNull: false,
+        },
+        passed: {
+          type: DataTypes.BOOLEAN,
+          allowNull: true,
         },
       },
       {

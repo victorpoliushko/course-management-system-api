@@ -6,9 +6,8 @@ import { Dialect } from 'sequelize';
 const port: number = parseInt(process.env.DB_PORT || '5432', 10);
 
 const constants = {
-  adminId: '7823ff39-4e96-4d23-a59c-e79c63dd48cf',
-  studentId: 'e79c312b-39c2-44dc-bd43-be5c4584d700',
   courseLimit: 5,
+  minRequiredGrade: 80,
   sessionSecret: process.env.SESSION_SECRET || '',
   db: {
     name: (process.env.NODE_ENV !== 'test' ? process.env.DB_NAME : process.env.TEST_DB_NAME) || 'postgres',
