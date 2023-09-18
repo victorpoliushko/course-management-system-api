@@ -22,6 +22,7 @@ import gradesRouter from './routes/grades';
 import usersRouter from './routes/users';
 import constants from './config/constants';
 import lessonRouter from './routes/lesson';
+import homeworkRouter from './routes/homework';
 
 const app: Express = express();
 const port = 8080; 
@@ -51,6 +52,7 @@ app.use('/feedbacks', feedbackRouter);
 app.use('/grades', gradesRouter);
 app.use('/users', usersRouter);
 app.use('/lessons', lessonRouter);
+app.use('/homework', homeworkRouter);
 
 async function connectToDatabase() {
   try {
