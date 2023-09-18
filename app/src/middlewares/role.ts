@@ -24,13 +24,18 @@ async function verifyRole(roleName: RoleName, req: Request, res: Response, next:
       return res.status(403).json({ error: `${roleName} role not found` });
     }
 
-    if (user.roleId !== role.id) {
-      return res.status(403).json({ error: `User does not have ${roleName} role` });
+    const adminRole = await RoleModel.findOne({ where: { name: RoleName.ADMIN } });
+    if (!adminRole) {
+      return res.status(403).json({ error: `${adminRole} role not found` });
     }
-
-    next();
+    
+    if (user.roleId === adminRole.id || user.roleId === role.id) {
+      next();
+    } else {
+      return res.status(403).json({ error: `User does not have premissions` });
+    }
   } catch (error) {
-    console.error(`Error verifying ${roleName} role:`, error);
+    console.error(`Error verifying premissions:`, error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

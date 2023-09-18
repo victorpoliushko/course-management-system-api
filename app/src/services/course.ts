@@ -28,22 +28,40 @@ export async function getCourses(req: Request, res: Response) {
 
 const addCourseSchema = Joi.object({
   name: Joi.string().required(),
-  lessonIds: Joi.array().items(Joi.string().uuid()).min(5).required()
+  lessonIds: Joi.array().items(Joi.string().uuid()).min(5).required(),
+  instructorIds: Joi.array().items(Joi.string().uuid()).min(1).required()
 });
 
 export async function addCourse(req: Request, res: Response) {
-  const { name, lessonIds } = req.body;
+  const { name, lessonIds, instructorIds } = req.body;
 
   try {
     const { error } = addCourseSchema.validate(req.body);
     if (error) {
       return validationErrorResponse(res, error);
     }
-
+    
     const course = await CourseModel.create({
       id: uuidv4(),
-      name
+      name,
     });
+
+    for (const instructorId of instructorIds) {
+      let courseInstructor: CourseInstructor;
+      const existingCourseInstructor = await CourseInstructorModel.findOne({ where: { instructorId } });
+
+      if (existingCourseInstructor) {
+        existingCourseInstructor.instructorId = instructorId;
+      
+        courseInstructor = await existingCourseInstructor.save();
+      } else {
+        courseInstructor = await CourseInstructorModel.create({
+          id: uuidv4(),
+          courseId: course.id,
+          instructorId
+        });
+      }
+    }
 
     for (const id of lessonIds) {
       let lesson = await LessonModel.findByPk(id);
