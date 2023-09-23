@@ -1,4 +1,5 @@
-import { DataTypes, Model } from "sequelize";
+import { Association, DataTypes, Model } from "sequelize";
+import { UserModel } from "./user";
 
 export enum RoleName {
   ADMIN = 'admin',
@@ -14,6 +15,12 @@ export interface Role {
 export class RoleModel extends Model implements Role {
   public id: string;
   public name: string;
+
+  public user: UserModel;
+
+  public static associations: {
+    user: Association<RoleModel, UserModel>;
+  };
 
   public static initialize(sequelize: any): void {
     this.init(

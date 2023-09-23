@@ -4,10 +4,10 @@ import { RoleModel, RoleName } from '../models/role';
 import Joi from 'joi';
 import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
-import { CourseStudentModel } from '../models/courseStudent';
 import { GradeModel } from '../models/grade';
 import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
 import constants from '../config/constants';
+import { CourseUserModel } from '../models/courseUser';
 
 const addMarkSchema = Joi.object({
   studentId: Joi.string().uuid().required(),
@@ -95,8 +95,8 @@ export async function getFinalCourseGrade(req: Request, res: Response) {
       return res.status(404).json({ error: 'User is not a student' });
     }
 
-    const studentCourse = await CourseStudentModel.findOne({
-      where: { courseId, studentId },
+    const studentCourse = await CourseUserModel.findOne({
+      where: { courseId, userId: studentId },
     });
 
     if (!studentCourse) {

@@ -4,13 +4,12 @@ import { RoleModel, RoleName } from '../models/role';
 import jwt from 'jsonwebtoken';
 import Joi from 'joi';
 import { Course, CourseModel } from '../models/course';
-import { CourseInstructor, CourseInstructorModel } from '../models/courseInstructor';
 import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
-import { CourseStudent, CourseStudentModel } from '../models/courseStudent';
 import { CourseFeedbackModel } from '../models/courseFeedback';
 import constants from '../config/constants';
 import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
+import { CourseUser, CourseUserModel } from '../models/courseUser';
 
 // test req
 
@@ -47,18 +46,31 @@ export async function addCourse(req: Request, res: Response) {
     });
 
     for (const instructorId of instructorIds) {
-      let courseInstructor: CourseInstructor;
-      const existingCourseInstructor = await CourseInstructorModel.findOne({ where: { instructorId } });
+      const instructor = await UserModel.findOne({ where: { id: instructorId } });
+
+      if (!instructor) {
+        return res.status(404).json({ error: `User not found` });
+      }
+
+      const userRole = await RoleModel.findOne({ where: { id: instructor.roleId } });
+
+      if (userRole?.name !== RoleName.INSTRUCTOR) {
+        return res.status(409).json({ error: `User ${instructorId} is not an ${RoleName.INSTRUCTOR}` });
+      }
+
+      let courseInstructor: CourseUser;
+      const existingCourseInstructor = await CourseUserModel.findOne({ where: { userId: instructorId } });
 
       if (existingCourseInstructor) {
-        existingCourseInstructor.instructorId = instructorId;
+        existingCourseInstructor.userId = instructorId;
       
         courseInstructor = await existingCourseInstructor.save();
       } else {
-        courseInstructor = await CourseInstructorModel.create({
+        courseInstructor = await CourseUserModel.create({
           id: uuidv4(),
           courseId: course.id,
-          instructorId
+          userId: instructorId,
+          roleId: userRole.id
         });
       }
     }
@@ -112,18 +124,19 @@ export async function assignCourseInstuctor(req: Request, res: Response) {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    let courseInstructor: CourseInstructor;
-    const existingCourseInstructor = await CourseInstructorModel.findOne({ where: { courseId } });
+    let courseInstructor: CourseUser;
+    const existingCourseInstructor = await CourseUserModel.findOne({ where: { courseId } });
 
     if (existingCourseInstructor) {
-      existingCourseInstructor.instructorId = instructorId;
+      existingCourseInstructor.userId = instructorId;
     
       courseInstructor = await existingCourseInstructor.save();
     } else {
-      courseInstructor = await CourseInstructorModel.create({
+      courseInstructor = await CourseUserModel.create({
         id: uuidv4(),
         courseId,
-        instructorId
+        userId: instructorId,
+        roleId: role.id
       });
     }
 
@@ -160,27 +173,36 @@ export async function assignCoursesStudent(req: Request, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    const role = await RoleModel.findOne({
+      where: { id: user.roleId },
+    });
+
+    if (!role || role.name !== RoleName.STUDENT) {
+      return res.status(404).json({ error: 'User is not a student' });
+    }
+
     for (const id of courseIds) {
-      const existingCourseStudent = await CourseStudentModel.findOne({
-        where: { courseId: id, studentId: user.id },
+      const existingCourseStudent = await CourseUserModel.findOne({
+        where: { courseId: id, userId: user.id },
       });
 
       if (existingCourseStudent) {
         continue;
       }
 
-      const studentCoursesCount = await CourseStudentModel.count({
-        where: { studentId: user.id },
+      const studentCoursesCount = await CourseUserModel.count({
+        where: { userId: user.id },
       });
 
       if (studentCoursesCount >= constants.courseLimit) {
         return res.status(400).json({ error: 'Maximum course limit reached' });
       }
 
-      const courseStudent = await CourseStudentModel.create({
+      const courseStudent = await CourseUserModel.create({
         id: uuidv4(),
         courseId: id,
-        studentId: user.id,
+        userId: user.id,
+        roleId: role.id
       });
   
       if (!courseStudent) {
@@ -285,13 +307,12 @@ export async function getOwnCourses(req: Request, res: Response) {
       return res.status(404).json({ error: 'User has no role' });
     }
 
-    let userCourses: CourseInstructor[] | CourseStudent[] | undefined;
+    let userCourses: CourseUser[] | undefined;
     let allCourses: Course[] | undefined;
 
     switch (role.name) {
-      case RoleName.INSTRUCTOR:
-        userCourses = await CourseInstructorModel.findAll({
-          where: { instructorId: userId },
+      case RoleName.INSTRUCTOR || RoleName.STUDENT:
+        userCourses = await CourseUserModel.findAll({ 
           include: [
             {
               model: CourseModel,
@@ -299,25 +320,19 @@ export async function getOwnCourses(req: Request, res: Response) {
               include: [
                 {
                   model: UserModel,
-                  as: 'instructor',
+                  as: 'user',
                 },
                 {
-                  model: UserModel,
-                  as: 'student',
-                },
+                  model: LessonModel,
+                  as: 'lesson',
+                }
               ],
             },
+            {
+              model: RoleModel,
+              as: 'role',
+            }
           ],
-        });
-      break;
-
-      case RoleName.STUDENT:
-        userCourses = await CourseStudentModel.findAll({
-          where: { studentId: userId },
-          include: {
-            model: CourseModel,
-            as: 'course',
-          },
         });
       break;
 
@@ -336,9 +351,9 @@ export async function getOwnCourses(req: Request, res: Response) {
       return res.status(404).json({ error: 'No courses for this user' });
     }
 
-    courses = userCourses.map((userCourse) => userCourse.course);
+    // courses = userCourses.map((userCourse) => userCourse);
 
-    return res.status(200).json({ courses });
+    return res.status(200).json({ userCourses });
   } catch (error) {
     console.error('Error retrieving instructor courses:', error);
     return res.status(500).json({ error: 'Internal server error' });
@@ -358,15 +373,24 @@ export async function getCourseStudents(req: Request, res: Response) {
       return validationErrorResponse(res, error);
     }
 
-    const courseStudents = await CourseStudentModel.findAll({
+    const studentRole = await RoleModel.findOne({ where: { name: RoleName.STUDENT } });
+
+    if (!studentRole) {
+      return res.status(404).json({ error: 'There is no student role' });
+    }
+
+    const courseStudents = await CourseUserModel.findAll({
       where: { courseId },
       include: {
         model: UserModel,
-        as: 'student',
+        as: 'user',
+        where: {
+          roleId: studentRole.id
+        }
       },
     });
 
-    const students = courseStudents.map((courseStudent) => courseStudent.student);
+    const students = courseStudents.map((courseStudent) => courseStudent.user);
 
     return res.status(200).json({ students });
   } catch (error) {
@@ -395,8 +419,8 @@ export async function getLessons(req: Request, res: Response) {
           as: 'lesson',
         },
         {
-          model: CourseInstructorModel,
-          as: 'instructor'
+          model: CourseUserModel,
+          as: 'user'
         }
       ],
     });

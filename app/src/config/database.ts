@@ -20,6 +20,11 @@ if (process.env.NODE_ENV === 'production') {
   config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
 }
 
+if (process.env.NODE_ENV === 'test') {
+  console.log('Running inside Docker container');
+  config.host = 'db';
+}
+
 else {
   console.log('Running from localhost. Connecting to DB directly.');
   config.host = 'localhost' ;

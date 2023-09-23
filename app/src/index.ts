@@ -11,9 +11,8 @@ import { UserModel } from './models/user';
 import { RoleModel } from './models/role';
 import { LessonModel } from './models/lesson';
 import { CourseModel } from './models/course';
-import { CourseInstructorModel } from './models/courseInstructor';
+import { CourseUserModel } from './models/courseUser';
 import { GradeModel } from './models/grade';
-import { CourseStudentModel } from './models/courseStudent';
 import { CourseFeedbackModel } from './models/courseFeedback';
 import courseRouter from './routes/courses';
 import authRouter from './routes/auth';
@@ -56,6 +55,8 @@ app.use('/homework', homeworkRouter);
 
 async function connectToDatabase() {
   try {
+    console.log('Trying to connect to PostgreSQL.');
+
     await sequelize.authenticate();
     console.log('Connection to PostgreSQL has been established successfully.');
   } catch (error) {
@@ -70,12 +71,11 @@ async function init(): Promise<void> {
     LessonModel.initialize(sequelize);
     CourseModel.initialize(sequelize);
     GradeModel.initialize(sequelize);
-    CourseInstructorModel.initialize(sequelize);
-    CourseStudentModel.initialize(sequelize);
+    CourseUserModel.initialize(sequelize);
     CourseFeedbackModel.initialize(sequelize);
 
-    CourseInstructorModel.associate({ CourseModel, UserModel });
-    CourseStudentModel.associate({ CourseModel, UserModel });
+    RoleModel.associate({ UserModel });
+    CourseUserModel.associate({ CourseModel, UserModel, RoleModel });
     CourseFeedbackModel.associate({ CourseModel, UserModel });
     CourseModel.associate({ LessonModel, UserModel });
     GradeModel.associate({ LessonModel, UserModel });

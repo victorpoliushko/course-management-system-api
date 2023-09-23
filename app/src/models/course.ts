@@ -42,14 +42,9 @@ export class CourseModel extends Model<Course> implements Course {
 
   static associate(models: any) {
     CourseModel.belongsToMany(models.UserModel, {
-      through: 'course_instructor',
+      through: 'course_user',
       foreignKey: 'courseId',
-      as: 'instructor',
-    });
-    CourseModel.belongsToMany(models.UserModel, {
-      through: 'course_student',
-      foreignKey: 'courseId',
-      as: 'student',
+      as: 'user',
     });
     CourseModel.hasMany(models.LessonModel, {
       foreignKey: 'courseId',

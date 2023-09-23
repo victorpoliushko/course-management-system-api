@@ -1,7 +1,8 @@
-import { Model, DataTypes } from 'sequelize';
+import { Model, DataTypes, Association } from 'sequelize';
 import bcrypt from 'bcryptjs';
 import sequelize from '../config/database';
 import { CourseModel } from './course';
+import { RoleModel } from './role';
 
 export interface User {
   id: string;
@@ -15,6 +16,12 @@ export class UserModel extends Model implements User {
   public username: string;
   public password: string;
   public roleId: string;
+
+  public role: RoleModel;
+
+  public static associations: {
+    role: Association<UserModel, RoleModel>;
+  };
 
   public static async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
@@ -64,15 +71,9 @@ export class UserModel extends Model implements User {
     });
 
     UserModel.belongsToMany(models.CourseModel, {
-      through: 'course_instructor',
-      foreignKey: 'instructorId',
-      as: 'courseInstructor',
-    });
-    
-    UserModel.belongsToMany(models.CourseModel, {
-      through: 'course_student',
-      foreignKey: 'studentId',
-      as: 'courseStudent',
+      through: 'course_user',
+      foreignKey: 'userId',
+      as: 'courseUser',
     });
   }
 }
