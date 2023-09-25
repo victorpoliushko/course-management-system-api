@@ -1,14 +1,8 @@
 import { Request, Response } from 'express';
-import { UserModel } from '../models/user';
-import { RoleModel, RoleName } from '../models/role';
-import jwt from 'jsonwebtoken';
 import Joi from 'joi';
-import { Course, CourseModel } from '../models/course';
 import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
-import { CourseFeedbackModel } from '../models/courseFeedback';
-import constants from '../config/constants';
-import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
+import { validationErrorResponse } from '../utils/error';
 
 const addLessonSchema = Joi.object({
   title: Joi.string().required()

@@ -11,20 +11,6 @@ import constants from '../config/constants';
 import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
 import { CourseUser, CourseUserModel } from '../models/courseUser';
 
-// test req
-
-export async function getCourses(req: Request, res: Response) {
-  try {
-    let allCourses = await CourseModel.findAll();
-    return res.status(200).json({ allCourses });
-  } catch (error) {
-    console.error('Error retrieving courses:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-}
-
-// end of test req
-
 const addCourseSchema = Joi.object({
   name: Joi.string().required(),
   lessonIds: Joi.array().items(Joi.string().uuid()).min(5).required(),
@@ -311,8 +297,11 @@ export async function getOwnCourses(req: Request, res: Response) {
     let allCourses: Course[] | undefined;
 
     switch (role.name) {
-      case RoleName.INSTRUCTOR || RoleName.STUDENT:
+      case RoleName.INSTRUCTOR:
         userCourses = await CourseUserModel.findAll({ 
+          where: {
+            userId: userId, 
+          },
           include: [
             {
               model: CourseModel,
@@ -332,26 +321,52 @@ export async function getOwnCourses(req: Request, res: Response) {
               model: RoleModel,
               as: 'role',
             }
-          ],
+          ]
+        });
+      break;
+
+      case RoleName.STUDENT:
+        userCourses = await CourseUserModel.findAll({ 
+          where: {
+            userId: userId, 
+          },
+          include: [
+            {
+              model: CourseModel,
+              as: 'course',
+              include: [
+                {
+                  model: LessonModel,
+                  as: 'lesson',
+                }
+              ],
+            }
+          ]
         });
       break;
 
       case RoleName.ADMIN:
-        allCourses = await CourseModel.findAll();
+        allCourses = await CourseModel.findAll({
+          include: [
+            {
+              model: UserModel,
+              as: 'user',
+            },
+            {
+              model: LessonModel,
+              as: 'lesson',
+            }
+          ]
+        });
         return res.status(200).json({ allCourses });
     
       default:
         return res.status(404).json({ error: 'No courses for this role' });
     }
-    
-    // todo
-    let courses: any;
 
     if (!userCourses || userCourses.length <= 0) {
       return res.status(404).json({ error: 'No courses for this user' });
     }
-
-    // courses = userCourses.map((userCourse) => userCourse);
 
     return res.status(200).json({ userCourses });
   } catch (error) {
@@ -417,17 +432,13 @@ export async function getLessons(req: Request, res: Response) {
         {
           model: LessonModel,
           as: 'lesson',
-        },
-        {
-          model: CourseUserModel,
-          as: 'user'
         }
       ],
     });
 
     return res.status(200).json({ course });
   } catch (error) {
-    console.error('Error retrieving instructor courses:', error);
+    console.error('Error retrieving course lessons:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

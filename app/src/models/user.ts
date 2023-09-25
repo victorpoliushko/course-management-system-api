@@ -75,5 +75,11 @@ export class UserModel extends Model implements User {
       foreignKey: 'userId',
       as: 'courseUser',
     });
+    
+    UserModel.belongsToMany(models.CourseModel, {
+      through: 'course_student',
+      foreignKey: 'studentId',
+      as: 'courseStudent',
+    });
   }
 }

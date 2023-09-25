@@ -18,14 +18,10 @@ const config = {
 if (process.env.NODE_ENV === 'production') {
   console.log('Running from cloud. Connecting to DB through GCP socket.');
   config.host = `/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}`;
-}
-
-if (process.env.NODE_ENV === 'test') {
+} else if (process.env.NODE_ENV === 'test') {
   console.log('Running inside Docker container');
   config.host = 'db';
-}
-
-else {
+} else {
   console.log('Running from localhost. Connecting to DB directly.');
   config.host = 'localhost' ;
 }

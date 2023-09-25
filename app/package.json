@@ -7,7 +7,7 @@
     "watch": "tsc -w",
     "start": "tsc && nodemon dist/index.js",
     "dev": "ts-node src/index.ts",
-    "test": "mocha --require ts-node/register --require tsconfig-paths/register \"src/test/**/*.test.ts\"",
+    "test": "mocha --require ts-node/register --recursive ./src/tests/*.spec.ts",
     "migrate:up": "npx sequelize-cli db:migrate",
     "migrate:down": "npx sequelize-cli db:migrate:undo",
     "migrate:status": "npx sequelize-cli db:migrate:status",
@@ -30,6 +30,7 @@
     "@types/node": "^18.11.18",
     "@types/passport": "^1.0.12",
     "@types/passport-local": "^1.0.35",
+    "@types/sinon": "^10.0.16",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^9.0.2",
     "bcryptjs": "^2.4.3",
@@ -58,6 +59,8 @@
     "multer": "^1.4.5-lts.1",
     "pg": "^8.8.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.28.0"
+    "sequelize": "^6.28.0",
+    "sinon": "^16.0.0",
+    "ts-auto-mock": "^3.7.1"
   }
 }
