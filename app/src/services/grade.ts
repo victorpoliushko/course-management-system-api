@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import { UserModel } from '../models/user';
 import { RoleModel, RoleName } from '../models/role';
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
 import { LessonModel } from '../models/lesson';
 import { v4 as uuidv4 } from 'uuid';
-import { GradeModel } from '../models/grade';
+import { Grade, GradeModel } from '../models/grade';
 import { validationErrorResponse, validationMultipleErrorResponse } from '../utils/error';
 import constants from '../config/constants';
 import { CourseUserModel } from '../models/courseUser';
+import { CourseModel } from '../models/course';
 
 const addMarkSchema = Joi.object({
   studentId: Joi.string().uuid().required(),
@@ -40,27 +42,70 @@ export async function addMark(req: Request, res: Response) {
       return validationMultipleErrorResponse(res, errors);
     }
 
-    const user = await UserModel.findByPk(studentId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication token not found' });
+    }
+
+    const decodedToken = jwt.verify(token, constants.sessionSecret) as { id: string };
+    const loggedInUserId = decodedToken.id;
+
+    const instructor = await UserModel.findByPk(loggedInUserId);
+    if (!instructor) {
+      return res.status(404).json({ error: 'Instructor not found' });
+    }
+
+    const student = await UserModel.findByPk(studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
     }
 
     const role = await RoleModel.findOne({
-      where: { id: user.roleId },
+      where: { id: student.roleId },
     });
 
     if (!role || role.name !== RoleName.STUDENT) {
       return res.status(404).json({ error: 'User is not a student' });
     }
 
-    const grade = await GradeModel.create({
+    const lesson = await LessonModel.findByPk(lessonId);
+
+    if (!lesson) {
+      return res.status(404).json({ error: 'User is not assigned to this lesson' });
+    }
+
+    const course = await CourseModel.findByPk(lesson.courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: 'This lesson does not have a course' });
+    }
+
+    const courseStudents = await CourseUserModel.findAll({ where: { userId: studentId }})
+
+    const courseStudentLessonAssigned = courseStudents.find(courseStudent => courseStudent.courseId === lesson.courseId);
+
+    if (!courseStudentLessonAssigned) {
+      return res.status(404).json({ error: 'Student is not assigned to a course with this lesson' });
+    }
+
+    const courseInstructors = await CourseUserModel.findAll({ where: { userId: loggedInUserId }})
+
+    const courseInstructorLessonAssigned = courseInstructors.find(courseInstructor => courseInstructor.courseId === lesson.courseId);
+
+    if (!courseInstructorLessonAssigned) {
+      return res.status(404).json({ error: 'Instructor is not assigned to a course with this lesson' });
+    }
+
+    let grade: Grade;
+
+    grade = await GradeModel.create({
       id: uuidv4(),
       lessonId,
       studentId,
       mark
     });
-
-    return res.status(200).json({ message: 'Grade assigned successfully' });
+   
+    return res.status(200).json({ message: `Grade assigned successfully ${grade.mark} `});
   } catch (error) {
     console.error('Error assigning grade:', error);
     return res.status(500).json({ error: 'Internal server error' });

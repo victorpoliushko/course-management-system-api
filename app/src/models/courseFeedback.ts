@@ -1,7 +1,4 @@
-import { DataTypes, Model, TEXT } from "sequelize";
-import sequelize from '../config/database';
-import { CourseModel } from './course';
-import { UserModel } from './user';
+import { DataTypes, Model } from "sequelize";
 
 export interface CourseFeedback {
   id: string;

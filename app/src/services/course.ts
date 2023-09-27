@@ -113,10 +113,8 @@ export async function assignCourseInstuctor(req: Request, res: Response) {
     let courseInstructor: CourseUser;
     const existingCourseInstructor = await CourseUserModel.findOne({ where: { courseId } });
 
-    if (existingCourseInstructor) {
-      existingCourseInstructor.userId = instructorId;
-    
-      courseInstructor = await existingCourseInstructor.save();
+    if (existingCourseInstructor && existingCourseInstructor.userId === instructorId) {
+      return res.status(409).json({ error: `User ${instructorId} aleady assigned to the course ${existingCourseInstructor.courseId}` });
     } else {
       courseInstructor = await CourseUserModel.create({
         id: uuidv4(),
@@ -507,3 +505,47 @@ export async function assignLessons(req: Request, res: Response) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+
+// const archiveCoursesSchema = Joi.object({
+//   courseIds: Joi.array().items(Joi.string().uuid()).min(1).required()
+// });
+
+// export async function archiveCourses(req: Request, res: Response) {
+//   const { courseIds } = req.body;
+
+//   try {
+//     const { error } = archiveCoursesSchema.validate(req.body);
+//     if (error) {
+//       return validationErrorResponse(res, error);
+//     }
+
+//     for (const courseId of courseIds) {
+//       const course = await CourseModel.findByPk(courseId);
+
+//       if (!course) {
+//         return res.status(404).json({ error: `Course ${courseId} not found` });
+//       }
+      
+//       const [affectedRows] = await CourseModel.update({ deleted: moment(Date.now()) }, {
+//         where: { id: courseId },
+//       });
+      
+//       if (affectedRows === 0) {
+//         return res.status(500).json({ error: 'Internal server error: Unable to delete the course' });
+//       }
+
+//       const archivedCourseUser = await CourseUserModel.update({ deleted: moment(Date.now()) }, {
+//         where: { courseId },
+//       });
+
+//       if (!archivedCourseUser) {
+//         return res.status(500).json({ error: 'Internal server error: Unable to delete the courseUser' });
+//       }
+//     }
+
+//     return res.status(200).json({ message: 'Courses archived successfully' });
+//   } catch (error) {
+//     console.error('Error archiving courses:', error);
+//     return res.status(500).json({ error: 'Internal server error' });
+//   }
+// }

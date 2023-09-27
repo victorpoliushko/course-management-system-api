@@ -1,7 +1,5 @@
 import { Model, DataTypes, Association } from 'sequelize';
 import bcrypt from 'bcryptjs';
-import sequelize from '../config/database';
-import { CourseModel } from './course';
 import { RoleModel } from './role';
 
 export interface User {

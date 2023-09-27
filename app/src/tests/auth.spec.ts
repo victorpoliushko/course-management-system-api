@@ -2,6 +2,7 @@ import { describe } from 'mocha';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index';
+import constants from '../config/constants';
 
 chai.use(chaiHttp);
 chai.should();
@@ -38,8 +39,8 @@ describe("Auth", () => {
       chai.request(app)
         .post('/auth/login')
         .send({
-          username: 'admin',
-          password: '123456',
+          username: constants.adminName,
+          password: constants.adminPass,
         })
         .end((err, res) => {
           res.should.have.status(200);
