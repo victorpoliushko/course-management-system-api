@@ -15,32 +15,32 @@ services:
     volumes:
       - promotion-postgres-volume:/var/lib/postgresql/data
 
-  # promotion-api:
-  #   networks:
-  #     - mynetwork
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   image: promotion-api:v1.3
-  #   container_name: promotion-api
-  #   # restart: on-failure
-  #   # env_file: .env
-  #   environment:
-  #     - NODE_ENV=dev
-  #     - DB_VOLUME=promotion-postgres-volume
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_HOST=db
-  #     - DB_USER=${DB_USER}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_PORT=${DB_PORT}
-  #   ports:
-  #     - 3000
-  #   links:
-  #     - db
-  #   depends_on:
-  #     - db
-  #   working_dir: /app
-  #   command: npm run start
+  promotion-api:
+    networks:
+      - mynetwork
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: promotion-api:v1.3
+    container_name: promotion-api
+    # restart: on-failure
+    # env_file: .env
+    environment:
+      - NODE_ENV=development
+      - DB_VOLUME=promotion-postgres-volume
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=db
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PORT=${DB_PORT}
+    ports:
+      - 3000
+    links:
+      - db
+    depends_on:
+      - db
+    working_dir: /app
+    command: npm run start
 
 volumes:
   promotion-postgres-volume:
