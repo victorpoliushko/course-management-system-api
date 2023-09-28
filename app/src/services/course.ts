@@ -268,6 +268,27 @@ export async function addCourseFeedback(req: Request, res: Response) {
   }
 }
 
+export async function getCourses(req: Request, res: Response) {
+  try {
+    const allCourses = await CourseModel.findAll({
+      include: [
+        {
+          model: UserModel,
+          as: 'user',
+        },
+        {
+          model: LessonModel,
+          as: 'lesson',
+        }
+      ]
+    });
+    return res.status(200).json({ allCourses });
+  } catch (error) {
+    console.error('Error retrieving instructor courses:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 export async function getOwnCourses(req: Request, res: Response) {
   try {
 

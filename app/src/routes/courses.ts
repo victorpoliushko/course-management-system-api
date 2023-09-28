@@ -1,10 +1,15 @@
 import express from 'express';
 
 import hasAccessToRoles from '../middlewares/role';
-import { addCourse, assignCourseInstuctor, assignCoursesStudent, assignLessons, getCourseStudents, getLessons, getOwnCourses } from '../services/course';
+import { addCourse, assignCourseInstuctor, assignCoursesStudent, assignLessons, getCourseStudents, getCourses, getLessons, getOwnCourses } from '../services/course';
 import { RoleName } from '../models/role';
 
 const courseRouter = express.Router();
+
+courseRouter.get('/all', (req, res, next) => {
+  const requiredRoles = [RoleName.ADMIN, RoleName.INSTRUCTOR, RoleName.STUDENT];
+  hasAccessToRoles(requiredRoles, req, res, next);
+}, getCourses);
 
 courseRouter.get('/', (req, res, next) => {
   const requiredRoles = [RoleName.ADMIN, RoleName.INSTRUCTOR, RoleName.STUDENT];
@@ -15,6 +20,11 @@ courseRouter.post('/', (req, res, next) => {
   const requiredRoles = [RoleName.ADMIN, RoleName.INSTRUCTOR];
   hasAccessToRoles(requiredRoles, req, res, next);
 }, addCourse);
+
+// courseRouter.post('/archive', (req, res, next) => {
+//   const requiredRoles = [RoleName.ADMIN];
+//   hasAccessToRoles(requiredRoles, req, res, next);
+// }, archiveCourses);
 
 courseRouter.post('/student', (req, res, next) => {
   const requiredRoles = [RoleName.ADMIN, RoleName.STUDENT];
