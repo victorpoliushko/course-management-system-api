@@ -1,9 +1,5 @@
-Promotion project
-Candidate should demonstrate the usage of all hard skills from above in this project.
 
 Project idea: CourseModel Management System API is an online management application. Its main purpose is to make efficient interaction between students and instructors in college during the period of submission of assignments and for getting appropriate feedback from instructors.
-
-We expect only backend API part of the project, without front end.
 
 Functional requirements
 Should be functionality for registration in the system;
@@ -25,14 +21,7 @@ The instructor should be able to see list of students per course;
 The student should be able to see his courses;
 The student should be able to see list of lessons per course with all related information;
 To pass the course student should get a minimum of 80% for final grade;
-Technical requirements
-JS/TS;
-Express.JS / Nest.JS;
-Relation DataBase (PostgreSQL, MySQL...);
-ORM;
-Database Migration tool (example Flyway);
-Unit tests for Controller, Service and DAO layers;
-e2e tests;
+
 Totally follow RESTful API specification;
 Token based auth (JWT preferably);
 API should be running inside docker container;
